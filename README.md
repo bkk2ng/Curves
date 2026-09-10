@@ -1,14 +1,14 @@
 <p align="center">
-  <img src="assets/hero.png" alt="ABCurves, human mouse motion continued in real time." width="920">
+  <img src="assets/hero.png" alt="Curves, human mouse motion continued in real time." width="920">
 </p>
 
 <p align="center">
-  A person starts aiming at a target. ABCurves watches the first part of the movement,
+  A person starts aiming at a target. Curves watches the first part of the movement,
   then finishes it the way that person might have finished it themselves.
 </p>
 
 <p align="center">
-  <a href="https://optima-manent.github.io/ABCurves/"><b>▶ Live demo</b></a> ·
+  <a href="https://optima-manent.github.io/Curves/"><b>▶ Live demo</b></a> ·
   <a href="DETECTION.md"><b>Detection study</b></a> ·
   <a href="docs/TRAINING_AND_INFERENCE.md">Train &amp; run</a> ·
   <a href="docs/DATASET.md">Dataset</a> ·
@@ -31,7 +31,7 @@ two integers telling the computer how far it just moved. A fast flick, a slow dr
 and the tiny correction before a click are each a few hundred of these reports in a
 row.
 
-The first goal of ABCurves was to generate movement inside ordinary human variation.
+The first goal of Curves was to generate movement inside ordinary human variation.
 That is already a surprisingly deep problem. A smooth line is not enough. Real
 movement has changing speed, corrections, pauses, bursts, and the quantized rhythm
 of physical hardware.
@@ -39,7 +39,7 @@ of physical hardware.
 But looking like *some* human was never the most interesting goal.
 
 **The real goal is to continue a movement so that the result looks like the same
-human who started it.** ABCurves watches the real beginning, reads how that person is
+human who started it.** Curves watches the real beginning, reads how that person is
 moving, and generates only the finish. The Planner chooses the shape of the curve;
 the global Renderer turns it into the raw 1 kHz reports a mouse would actually send.
 
@@ -54,13 +54,13 @@ challenge the result.
 The common approach is to choose a start A and a target C, then generate the whole
 movement between them. I think that asks the model to throw away its best evidence.
 
-ABCurves solves this version instead:
+Curves solves this version instead:
 
 > The human starts the movement. We watch them travel from A toward the target, cut
 > at B, and generate only the finish from B to C.
 
 <p align="center">
-  <img src="assets/abc_diagram.png" width="720" alt="The human moves from A to B and ABCurves continues from B to target C.">
+  <img src="assets/abc_diagram.png" width="720" alt="The human moves from A to B and Curves continues from B to target C.">
 </p>
 
 The point is not that generating half a movement is half the work. **The first half
@@ -77,7 +77,7 @@ producing something broadly human-like to continuing **this human movement**.
 ## One problem, two models
 
 Movement shape and millisecond hardware texture are different problems. Trying to
-make one small real-time model learn both blurred them together, so ABCurves gives
+make one small real-time model learn both blurred them together, so Curves gives
 each problem its own tool.
 
 1. **The Planner** reads A→B and the target, then chooses a smooth B→C finish. It
@@ -104,7 +104,7 @@ flowchart LR
 
 Planning a movement as hundreds of unrelated `dx, dy` predictions is difficult. A
 small error at one step changes the next step, and the whole trajectory can drift.
-ABCurves instead predicts the finish as one object using **ProDMP**.
+Curves instead predicts the finish as one object using **ProDMP**.
 
 The intuition behind ProDMP is simple: a wide range of smooth human curves can be
 written as mixtures of a small set of motion patterns. Think of those patterns as
@@ -129,7 +129,7 @@ The Planner therefore has **sixteen ProDMP heads**. That number was not arbitrar
 matched the average number of statistically equivalent finish modes I found in the
 human data. During training, the head closest to the recorded finish learns most from
 that example, so the heads can specialize instead of collapsing into one average. At
-runtime, ABCurves samples one head; it does not generate sixteen answers and secretly
+runtime, Curves samples one head; it does not generate sixteen answers and secretly
 keep the best one.
 
 These animations show that range directly. Each begins with the same observed
@@ -137,10 +137,10 @@ movement and target, then compares the real human finish with four finishes samp
 from the Planner. The first is a fast flick and the second is a fine adjustment.
 
 <p align="center">
-  <img src="assets/spread_flick_2.gif" width="830" alt="A real human flick beside four finishes sampled from the ABCurves Planner.">
+  <img src="assets/spread_flick_2.gif" width="830" alt="A real human flick beside four finishes sampled from the Curves Planner.">
 </p>
 <p align="center">
-  <img src="assets/spread_adjust_8.gif" width="830" alt="A real human fine adjustment beside four finishes sampled from the ABCurves Planner.">
+  <img src="assets/spread_adjust_8.gif" width="830" alt="A real human fine adjustment beside four finishes sampled from the Curves Planner.">
 </p>
 
 ### The global Renderer learns texture everywhere, from anyone
@@ -150,7 +150,7 @@ steps. Many reports are zero, motion arrives in short bursts, and the rhythm cha
 with speed, direction, the hand, and the device.
 
 <p align="center">
-  <img src="assets/renderer_texture.png" width="720" alt="Real hardware texture compared with a smooth plan, simple rounding, statistical jitter, and the ABCurves Renderer.">
+  <img src="assets/renderer_texture.png" width="720" alt="Real hardware texture compared with a smooth plan, simple rounding, statistical jitter, and the Curves Renderer.">
 </p>
 
 The global Renderer learns this translation from uninterrupted 1 kHz recordings
@@ -209,10 +209,10 @@ was from the human it followed.
 ### 2. Can it be detected without knowing the person first?
 
 The cold test hides every recording from the person or setup being judged and tests
-the complete ABCurves pipeline. Its human-safe judges caught **none of 1,280**
+the complete Curves pipeline. Its human-safe judges caught **none of 1,280**
 generated trials. A broader search found 6 of 40 fully generated groups,
 but it also accused genuine movement from two of six unseen humans. That is not a
-safe way to identify ABCurves, which remained **undetectable in this practical cold
+safe way to identify Curves, which remained **undetectable in this practical cold
 setting**.
 
 A warm detector gets a much easier problem: trusted clean movement from the exact
@@ -239,8 +239,8 @@ side benchmark.
 ## Try it
 
 ```bash
-git clone https://github.com/optima-manent/ABCurves.git
-cd ABCurves
+git clone https://github.com/optima-manent/Curves.git
+cd Curves
 python -m pip install -e .
 ```
 
@@ -265,7 +265,7 @@ B handoff and reusable across events.
 
 ```python
 import numpy as np
-from abcurves import Pipeline
+from curves import Pipeline
 
 planner_prefix = np.asarray(prefix_raw_dxdy, dtype=np.float32)
 profile_window = np.asarray(representative_256_raw_reports, dtype=np.int16)
@@ -306,7 +306,7 @@ so its example profile explicitly assumes quiet history before the shorter prefi
 real integration should prepare a genuine representative sample from its device.
 For one-report-at-a-time output, see [`examples/streaming.py`](examples/streaming.py).
 
-ABCurves returns integer reports; it does not own a USB device. Polling, queues,
+Curves returns integer reports; it does not own a USB device. Polling, queues,
 permissions, firmware, and the final HID write remain the caller's responsibility.
 
 ---
@@ -334,7 +334,7 @@ python tools/prepare_dataset.py events.npz prepared_planner/ \
   --config configs/final.json --branch planner
 ```
 
-A portable `abcurves.full_sessions.v1` `sessions.json` can build the Renderer only:
+A portable `curves.full_sessions.v1` `sessions.json` can build the Renderer only:
 
 ```bash
 python tools/prepare_dataset.py full_sessions/sessions.json prepared_renderer/ \
@@ -360,7 +360,7 @@ The Renderer command writes a float checkpoint that can be used directly in the
 same pipeline:
 
 ```python
-from abcurves import Pipeline
+from curves import Pipeline
 
 with Pipeline(float_renderer_checkpoint="runs/renderer_retrained.pt") as pipeline:
     renderer_profile = pipeline.prepare_renderer_profile(profile_window)
@@ -388,7 +388,7 @@ and runtime recipe is in
 ## What is in the repository?
 
 ```text
-abcurves/
+curves/
   pipeline.py            load-once Planner → Renderer API
   planner.py             smooth path, timing, and landing
   renderer.py            float Renderer training and checkpoint runtime
@@ -414,7 +414,7 @@ contributed hardware corpus used to select the release.
 
 ## The people who made this possible
 
-Roughly 100 people took time to run ABCurves Capture and share real sessions from
+Roughly 100 people took time to run Curves Capture and share real sessions from
 their hands, mice, computers, and settings. That data made it possible to move beyond
 “this looks convincing” and test the idea across real hardware and real human
 variation.
@@ -437,14 +437,14 @@ The Planner's movement representation builds on **ProDMP**:
 > *ProDMP: A Unified Perspective on Dynamic and Probabilistic Movement Primitives.*
 > arXiv:2210.01531, 2022. <https://arxiv.org/abs/2210.01531>
 
-If ABCurves helps your work, cite this repository:
+If Curves helps your work, cite this repository:
 
 ```bibtex
-@software{abcurves,
-  title  = {ABCurves: Real-Time Human-Conditioned Mouse-Motion Continuation},
+@software{curves,
+  title  = {Curves: Real-Time Human-Conditioned Mouse-Motion Continuation},
   author = {Optima Manent},
   year   = {2026},
-  url    = {https://github.com/optima-manent/ABCurves}
+  url    = {https://github.com/optima-manent/Curves}
 }
 ```
 
@@ -454,12 +454,12 @@ Released under the [MIT License](LICENSE).
 
 ## Support the project
 
-Many people have kindly asked if they can support my work financially. ABCurves
+Many people have kindly asked if they can support my work financially. Curves
 will always stay free and open source. It was built for the community, with the help
 of the community, and that will never change.
 
 If you still insist, you can **[support my work here](https://github.com/sponsors/optima-manent?frequency=one-time)**.
-It helps cover a little of the hundreds of hours that went into ABCurves. And thank
+It helps cover a little of the hundreds of hours that went into Curves. And thank
 you, it genuinely means a lot. :)
 
 ---
